@@ -1,4 +1,5 @@
-const STORAGE_KEY = "phase10-scorekeeper-v1";
+const STORAGE_KEY = "phase10-scorekeeper-v2";
+const OLD_STORAGE_KEY = "phase10-scorekeeper-v1";
 const THEME_KEY = "phase10-theme";
 
 const phaseRules = [
@@ -42,7 +43,7 @@ els.form.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = els.name.value.trim();
   if (!name) return;
-  state.players.push({ id: crypto.randomUUID(), name, phases: Array(10).fill(false), rounds: [] });
+  state.players.push(createPlayer(name));
   els.name.value = "";
   saveAndRender();
 });
@@ -50,12 +51,19 @@ els.form.addEventListener("submit", (event) => {
 els.reset.addEventListener("click", () => {
   if (!confirm("Να διαγραφεί όλο το παιχνίδι;")) return;
   state = { players: [] };
+  localStorage.removeItem(OLD_STORAGE_KEY);
   saveAndRender();
 });
 
 els.addRound.addEventListener("click", () => {
   state.players.forEach(player => {
-    player.rounds.push({ round: player.rounds.length + 1, phase: nextPhase(player), passed: false, score: 0 });
+    ensurePlayerShape(player);
+    player.rounds.push({
+      round: player.rounds.length + 1,
+      phase: Math.min(nextPhase(player), 10),
+      passed: false,
+      score: 0
+    });
   });
   saveAndRender();
 });
@@ -76,6 +84,15 @@ els.themeToggle.addEventListener("click", () => {
   localStorage.setItem(THEME_KEY, next);
 });
 
+function createPlayer(name) {
+  return {
+    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    name,
+    phases: Array(10).fill(false),
+    rounds: []
+  };
+}
+
 function render() {
   els.players.innerHTML = "";
   els.players.classList.toggle("empty", state.players.length === 0);
@@ -86,7 +103,10 @@ function render() {
     return;
   }
 
-  state.players.forEach(player => els.players.appendChild(renderPlayer(player)));
+  state.players.forEach(player => {
+    ensurePlayerShape(player);
+    els.players.appendChild(renderPlayer(player));
+  });
   renderWinner();
 }
 
@@ -96,14 +116,24 @@ function renderPlayer(player) {
   const nameInput = node.querySelector(".name-input");
   const currentPhase = node.querySelector(".current-phase");
   const totalScore = node.querySelector(".total-score");
+  const totalScoreTop = node.querySelector(".total-score-top");
   const phaseGrid = node.querySelector(".phase-grid");
   const scoreInput = node.querySelector(".round-score");
   const passedInput = node.querySelector(".phase-passed");
   const history = node.querySelector(".history");
 
+  const total = totalScoreFor(player);
+  const phase = nextPhase(player);
+
+  card.dataset.playerId = player.id;
   nameInput.value = player.name;
+  currentPhase.textContent = phase > 10 ? "Ολοκληρώθηκε" : phase;
+  totalScore.textContent = total;
+  totalScoreTop.textContent = `Σύνολο: ${total}`;
+
   nameInput.addEventListener("change", () => {
-    player.name = nameInput.value.trim() || player.name;
+    const nextName = nameInput.value.trim();
+    if (nextName) player.name = nextName;
     saveAndRender();
   });
 
@@ -113,28 +143,45 @@ function renderPlayer(player) {
     saveAndRender();
   });
 
-  currentPhase.textContent = nextPhase(player) > 10 ? "Ολοκληρώθηκε" : nextPhase(player);
-  totalScore.textContent = totalScoreFor(player);
-
   player.phases.forEach((done, index) => {
+    const wrap = document.createElement("div");
+    wrap.className = "phase-cell";
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = `phase-btn ${done ? "done" : ""}`;
     button.textContent = index + 1;
-    button.title = phaseRules[index];
+    button.title = `${index + 1}η φάση: ${phaseRules[index]}`;
+    button.setAttribute("aria-pressed", done ? "true" : "false");
     button.addEventListener("click", () => {
       player.phases[index] = !player.phases[index];
       saveAndRender();
     });
-    phaseGrid.appendChild(button);
+
+    const text = document.createElement("small");
+    text.className = "phase-description";
+    text.textContent = phaseRules[index];
+
+    wrap.append(button, text);
+    phaseGrid.appendChild(wrap);
   });
 
   node.querySelector(".save-round").addEventListener("click", () => {
-    const score = Number.parseInt(scoreInput.value || "0", 10);
-    const phase = nextPhase(player) > 10 ? 10 : nextPhase(player);
+    const score = Math.max(0, Number.parseInt(scoreInput.value || "0", 10) || 0);
+    const current = Math.min(nextPhase(player), 10);
     const passed = passedInput.checked;
-    player.rounds.push({ round: player.rounds.length + 1, phase, passed, score: Number.isFinite(score) ? score : 0 });
-    if (passed && phase <= 10) player.phases[phase - 1] = true;
+
+    player.rounds.push({
+      round: player.rounds.length + 1,
+      phase: current,
+      passed,
+      score
+    });
+
+    if (passed && current <= 10) {
+      player.phases[current - 1] = true;
+    }
+
     saveAndRender();
   });
 
@@ -144,10 +191,12 @@ function renderPlayer(player) {
     const td = document.createElement("td");
     const del = document.createElement("button");
     del.type = "button";
-    del.className = "danger small";
+    del.className = "danger small delete-round";
     del.textContent = "Χ";
+    del.title = "Διαγραφή γύρου";
     del.addEventListener("click", () => {
       player.rounds.splice(index, 1);
+      rebuildPhasesFromHistory(player);
       renumberRounds(player);
       saveAndRender();
     });
@@ -182,9 +231,31 @@ function renumberRounds(player) {
   player.rounds.forEach((round, index) => round.round = index + 1);
 }
 
+function rebuildPhasesFromHistory(player) {
+  player.phases = Array(10).fill(false);
+  player.rounds.forEach(round => {
+    if (round.passed && round.phase >= 1 && round.phase <= 10) {
+      player.phases[round.phase - 1] = true;
+    }
+  });
+}
+
+function ensurePlayerShape(player) {
+  player.id ||= crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  player.name ||= "Παίκτης";
+  player.phases = Array.isArray(player.phases) ? player.phases.slice(0, 10) : Array(10).fill(false);
+  while (player.phases.length < 10) player.phases.push(false);
+  player.rounds = Array.isArray(player.rounds) ? player.rounds : [];
+  renumberRounds(player);
+}
+
 function loadState() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { players: [] };
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : { players: [] };
+    parsed.players = Array.isArray(parsed.players) ? parsed.players : [];
+    parsed.players.forEach(ensurePlayerShape);
+    return parsed;
   } catch {
     return { players: [] };
   }

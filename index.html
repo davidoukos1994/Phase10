@@ -64,7 +64,10 @@
   <template id="playerCardTemplate">
     <article class="player-card">
       <div class="player-top">
-        <input class="name-input" aria-label="Όνομα παίκτη" />
+        <div class="name-with-total">
+          <input class="name-input" aria-label="Όνομα παίκτη" />
+          <strong class="total-score-top">Σύνολο: 0</strong>
+        </div>
         <button class="remove-player danger small" type="button">Διαγραφή</button>
       </div>
       <div class="stats">
