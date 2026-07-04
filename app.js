@@ -144,26 +144,27 @@ function renderPlayer(player) {
   });
 
   player.phases.forEach((done, index) => {
-    const wrap = document.createElement("div");
-    wrap.className = "phase-cell";
-
     const button = document.createElement("button");
     button.type = "button";
     button.className = `phase-btn ${done ? "done" : ""}`;
-    button.textContent = index + 1;
     button.title = `${index + 1}η φάση: ${phaseRules[index]}`;
     button.setAttribute("aria-pressed", done ? "true" : "false");
-    button.addEventListener("click", () => {
-      player.phases[index] = !player.phases[index];
-      saveAndRender();
-    });
+
+    const number = document.createElement("span");
+    number.className = "phase-number";
+    number.textContent = index + 1;
 
     const text = document.createElement("small");
     text.className = "phase-description";
     text.textContent = phaseRules[index];
 
-    wrap.append(button, text);
-    phaseGrid.appendChild(wrap);
+    button.append(number, text);
+    button.addEventListener("click", () => {
+      player.phases[index] = !player.phases[index];
+      saveAndRender();
+    });
+
+    phaseGrid.appendChild(button);
   });
 
   node.querySelector(".save-round").addEventListener("click", () => {

@@ -128,28 +128,35 @@ th { color: var(--muted); }
   padding: .65rem .85rem;
 }
 .phase-grid {
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
   align-items: stretch;
-}
-.phase-cell {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: .45rem;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: .55rem;
-  background: rgba(127,127,127,.06);
 }
 .phase-btn {
   width: 100%;
-  min-height: 44px;
+  min-height: 118px;
   aspect-ratio: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: .5rem;
+  padding: .8rem .65rem;
+  text-align: center;
+  white-space: normal;
+}
+.phase-number {
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 950;
 }
 .phase-description {
   color: var(--muted);
-  font-weight: 700;
-  line-height: 1.25;
+  font-weight: 750;
+  line-height: 1.2;
   font-size: .78rem;
+}
+.phase-btn.done .phase-description {
+  color: rgba(255,255,255,.9);
 }
 .delete-round { width: auto; }
 
