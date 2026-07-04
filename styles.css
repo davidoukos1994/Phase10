@@ -1,0 +1,113 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f4ef;
+  --panel: #ffffff;
+  --text: #211f1c;
+  --muted: #6f6a61;
+  --accent: #ff7a1a;
+  --accent-2: #1f8a70;
+  --danger: #b42318;
+  --border: #e4ded4;
+  --shadow: 0 12px 32px rgba(33, 31, 28, 0.10);
+}
+
+body.dark {
+  color-scheme: dark;
+  --bg: #161514;
+  --panel: #22201d;
+  --text: #f7efe3;
+  --muted: #c6bbaa;
+  --border: #3a352f;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, rgba(255,122,26,.16), transparent 30%), var(--bg);
+  color: var(--text);
+}
+
+button, input { font: inherit; }
+button {
+  border: 0;
+  border-radius: 14px;
+  padding: .75rem 1rem;
+  background: var(--accent);
+  color: white;
+  font-weight: 750;
+  cursor: pointer;
+}
+button:hover { filter: brightness(.96); transform: translateY(-1px); }
+button.secondary { background: var(--accent-2); }
+button.danger { background: var(--danger); }
+button.ghost { background: var(--panel); color: var(--text); box-shadow: var(--shadow); }
+button.small { padding: .5rem .7rem; border-radius: 10px; font-size: .9rem; }
+input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: .8rem .9rem;
+  background: var(--panel);
+  color: var(--text);
+}
+label { display: grid; gap: .4rem; color: var(--muted); font-weight: 700; }
+
+.hero {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.hero h1 { margin: .2rem 0 .4rem; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; }
+.hero p { margin: 0; color: var(--muted); max-width: 680px; }
+.eyebrow { color: var(--accent) !important; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.container { max-width: 1120px; margin: 0 auto; padding: 1rem; }
+.panel, .player-card {
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 24px;
+  padding: 1rem;
+}
+.add-player { display: grid; gap: 1rem; }
+.row, .actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; }
+.row input { min-width: min(420px, 100%); flex: 1; }
+.rules { margin-top: 1rem; }
+summary { cursor: pointer; font-weight: 900; padding: .6rem 0; }
+.hint { color: var(--muted); margin-bottom: 0; }
+.scoreboard-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.winner { color: var(--accent-2); font-weight: 900; }
+.players { display: grid; gap: 1rem; }
+.players.empty { place-items: center; min-height: 150px; color: var(--muted); }
+.player-card { display: grid; gap: 1rem; }
+.player-top, .stats, .round-entry { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+.name-input { font-weight: 900; font-size: 1.2rem; flex: 1; min-width: 180px; }
+.stats span { background: rgba(127,127,127,.08); padding: .55rem .75rem; border-radius: 999px; color: var(--muted); }
+.stats strong { color: var(--text); }
+.phase-grid { display: grid; grid-template-columns: repeat(10, minmax(40px, 1fr)); gap: .45rem; }
+.phase-btn {
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 12px;
+  background: rgba(127,127,127,.14);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.phase-btn.done { background: var(--accent-2); color: white; border-color: var(--accent-2); }
+.round-entry label:first-child { width: 150px; }
+.checkbox-label { display: flex; flex-direction: row; align-items: center; gap: .5rem; color: var(--text); }
+.checkbox-label input { width: auto; }
+table { width: 100%; border-collapse: collapse; margin-top: .75rem; font-size: .95rem; }
+th, td { text-align: left; padding: .65rem; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); }
+@media (max-width: 720px) {
+  .phase-grid { grid-template-columns: repeat(5, 1fr); }
+  .row, .actions, .player-top, .round-entry { align-items: stretch; }
+  button { width: 100%; }
+  .remove-player { width: auto; }
+}

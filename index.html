@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 10 Scorekeeper</title>
+  <meta name="description" content="Εφαρμογή καταγραφής φάσεων και πόντων για Phase 10." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Phase 10</p>
+      <h1>Μετρητής φάσεων & πόντων</h1>
+      <p>Πρόσθεσε παίκτες, σημείωσε ποια φάση πέρασαν και κράτα πόντους ανά γύρο.</p>
+    </div>
+    <button id="themeToggle" class="ghost" type="button" aria-label="Αλλαγή θέματος">🌙</button>
+  </header>
+
+  <main class="container">
+    <section class="panel add-player">
+      <form id="playerForm">
+        <label for="playerName">Όνομα παίκτη</label>
+        <div class="row">
+          <input id="playerName" name="playerName" type="text" placeholder="π.χ. Μαρία" autocomplete="off" required maxlength="24" />
+          <button type="submit">Προσθήκη</button>
+        </div>
+      </form>
+      <div class="actions">
+        <button id="addRoundBtn" type="button">Νέος γύρος</button>
+        <button id="exportBtn" class="secondary" type="button">Εξαγωγή JSON</button>
+        <button id="resetBtn" class="danger" type="button">Νέο παιχνίδι</button>
+      </div>
+    </section>
+
+    <section class="rules panel">
+      <details>
+        <summary>Φάσεις Phase 10</summary>
+        <ol id="phaseRules"></ol>
+      </details>
+      <details>
+        <summary>Υπολογισμός πόντων</summary>
+        <ul>
+          <li>Κάρτες 1–9: 5 πόντοι</li>
+          <li>Κάρτες 10–12: 10 πόντοι</li>
+          <li>Κάρτες μπλοκαρίσματος (!): 15 πόντοι</li>
+          <li>Μπαλαντέρ (*): 25 πόντοι</li>
+        </ul>
+        <p class="hint">Ο νικητής γύρου γράφει 0. Οι υπόλοιποι γράφουν τους πόντους από τις κάρτες που έμειναν στο χέρι.</p>
+      </details>
+    </section>
+
+    <section class="scoreboard" aria-live="polite">
+      <div class="scoreboard-head">
+        <h2>Παίκτες</h2>
+        <span id="winnerText" class="winner"></span>
+      </div>
+      <div id="players" class="players empty">
+        <p>Δεν υπάρχουν παίκτες ακόμα. Πρόσθεσε τον πρώτο παίκτη για να ξεκινήσεις.</p>
+      </div>
+    </section>
+  </main>
+
+  <template id="playerCardTemplate">
+    <article class="player-card">
+      <div class="player-top">
+        <input class="name-input" aria-label="Όνομα παίκτη" />
+        <button class="remove-player danger small" type="button">Διαγραφή</button>
+      </div>
+      <div class="stats">
+        <span>Τρέχουσα φάση: <strong class="current-phase">1</strong></span>
+        <span>Σύνολο πόντων: <strong class="total-score">0</strong></span>
+      </div>
+      <div class="phase-grid" aria-label="Φάσεις 1 έως 10"></div>
+      <div class="round-entry">
+        <label>Πόντοι γύρου
+          <input class="round-score" type="number" min="0" step="1" placeholder="0" />
+        </label>
+        <label class="checkbox-label">
+          <input class="phase-passed" type="checkbox" /> Πέρασε τη φάση σε αυτόν τον γύρο
+        </label>
+        <button class="save-round" type="button">Καταχώρηση γύρου</button>
+      </div>
+      <details class="history-wrap">
+        <summary>Ιστορικό γύρων</summary>
+        <table>
+          <thead><tr><th>Γύρος</th><th>Φάση</th><th>Πέρασε</th><th>Πόντοι</th><th></th></tr></thead>
+          <tbody class="history"></tbody>
+        </table>
+      </details>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
